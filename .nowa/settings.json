@@ -1,0 +1,12 @@
+{
+    "version": "3.9.4",
+    "app": {
+        "name": "syncpoint_paradox_logic",
+        "bundleId": "com.example.syncpointparadoxlogic"
+    },
+    "main": {},
+    "experimental": {
+        "load_packages": true
+    },
+    "permissions": []
+}

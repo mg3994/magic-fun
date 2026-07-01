@@ -13,6 +13,7 @@ class TelemetryDashboard extends StatelessWidget {
   Widget build(BuildContext context) {
     final state = AppState.of(context, listen: true);
     final theme = Theme.of(context);
+    final isHorizontal = MediaQuery.of(context).size.width > 900;
     final minutes = (state.ticksElapsed ~/ 60).toString().padLeft(2, '0');
     final seconds = (state.ticksElapsed % 60).toString().padLeft(2, '0');
     final timeStr = '${minutes}:${seconds}';
@@ -30,7 +31,7 @@ class TelemetryDashboard extends StatelessWidget {
               ? Colors.amber.withValues(alpha: 0.05)
               : Colors.red.withValues(alpha: 0.08));
     return Container(
-      width: 320,
+      width: isHorizontal ? 320 : null,
       decoration: BoxDecoration(
         color: panelBg,
         border: Border(

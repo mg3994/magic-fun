@@ -149,6 +149,26 @@ class AppState extends ChangeNotifier {
       );
       return;
     }
+
+    double finalX = posX;
+    double finalY = posY;
+    bool collision = true;
+    int attempts = 0;
+
+    while (collision && attempts < 20) {
+      collision = false;
+      for (var node in nodes) {
+        final dist = sqrt(pow(node.posX - finalX, 2) + pow(node.posY - finalY, 2));
+        if (dist < 200) {
+          collision = true;
+          finalX += 50;
+          finalY += 50;
+          break;
+        }
+      }
+      attempts++;
+    }
+
     final random = DateTime.now().millisecondsSinceEpoch;
     final id = 'NODE-${random % 10000}';
     final minVal = 10 + (random % 40);
@@ -162,8 +182,8 @@ class AppState extends ChangeNotifier {
       baseValue: type == RealityNodeType.constant ? 50.0 : 0.0,
       calculatedValue: type == RealityNodeType.constant ? 50.0 : 0.0,
       dependencies: [],
-      posX: posX,
-      posY: posY,
+      posX: finalX,
+      posY: finalY,
       targetValueRangeMin: double.parse(minVal.toStringAsFixed(0)),
       targetValueRangeMax: double.parse(maxVal.toStringAsFixed(0)),
     );
@@ -775,6 +795,17 @@ class AppState extends ChangeNotifier {
   void panCanvas(double dx, double dy) {
     canvasOffsetX += dx;
     canvasOffsetY += dy;
+    notifyListeners();
+  }
+
+  void updateCanvasTransform(double x, double y, double scale) {
+    canvasOffsetX = x;
+    canvasOffsetY = y;
+    canvasScale = scale;
+    // We don't notifyListeners here because this is called FROM the widget that is already rebuilding
+    // or to keep it in sync. If we notifyListeners, it might cause infinite loops if not handled.
+    // However, other widgets might need to know the scale.
+    // Let's notify listeners but be careful.
     notifyListeners();
   }
 

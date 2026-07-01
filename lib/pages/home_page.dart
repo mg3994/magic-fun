@@ -162,12 +162,48 @@ class HomePage extends StatelessWidget {
                       ),
                     )
                   : null,
-              child: const Row(
-                children: const [
-                  RealityTreeSidebar(),
-                  Expanded(child: LogicGridCanvas()),
-                  TelemetryDashboard(),
-                ],
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  if (constraints.maxWidth > 900) {
+                    return const Row(
+                      children: const [
+                        RealityTreeSidebar(),
+                        Expanded(child: LogicGridCanvas()),
+                        TelemetryDashboard(),
+                      ],
+                    );
+                  } else {
+                    return Column(
+                      children: [
+                        const Expanded(child: LogicGridCanvas()),
+                        Container(
+                          height: 400,
+                          child: DefaultTabController(
+                            length: 2,
+                            child: Column(
+                              children: [
+                                const TabBar(
+                                  tabs: [
+                                    Tab(icon: Icon(Icons.lan_outlined), text: 'GRAPH'),
+                                    Tab(icon: Icon(Icons.monitor_heart), text: 'SYSTEM'),
+                                  ],
+                                ),
+                                const Expanded(
+                                  child: TabBarView(
+                                    children: [
+                                      RealityTreeSidebar(),
+                                      TelemetryDashboard(),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    );
+                  }
+                },
               ),
             ),
             if (state.hasParadox)

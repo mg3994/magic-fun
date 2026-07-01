@@ -35,8 +35,10 @@ class _RealityTreeSidebarState extends State<RealityTreeSidebar> {
   Widget build(BuildContext context) {
     final state = AppState.of(context, listen: true);
     final theme = Theme.of(context);
+    final isHorizontal = MediaQuery.of(context).size.width > 900;
+
     return Container(
-      width: 320,
+      width: isHorizontal ? 320 : null,
       decoration: BoxDecoration(
         color: theme.colorScheme.surface.withValues(alpha: 0.95),
         border: Border(

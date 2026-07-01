@@ -149,7 +149,7 @@ class HomePage extends StatelessWidget {
         (state.hasParadox || state.totalStability < 30) &&
         (state.ticksElapsed % 2 == 0);
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: const Color(0xFF020408),
       body: SafeArea(
         child: Stack(
           children: [
@@ -165,11 +165,11 @@ class HomePage extends StatelessWidget {
               child: LayoutBuilder(
                 builder: (context, constraints) {
                   if (constraints.maxWidth > 900) {
-                    return const Row(
-                      children: const [
-                        RealityTreeSidebar(),
-                        Expanded(child: LogicGridCanvas()),
-                        TelemetryDashboard(),
+                    return Row(
+                      children: [
+                        const RealityTreeSidebar(),
+                        const Expanded(child: LogicGridCanvas()),
+                        const TelemetryDashboard(),
                       ],
                     );
                   } else {
@@ -178,12 +178,25 @@ class HomePage extends StatelessWidget {
                         const Expanded(child: LogicGridCanvas()),
                         Container(
                           height: 400,
+                          decoration: BoxDecoration(
+                            color: const Color(0xFF0F141C),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.5),
+                                blurRadius: 20,
+                                offset: const Offset(0, -5),
+                              ),
+                            ],
+                          ),
                           child: DefaultTabController(
                             length: 2,
                             child: Column(
                               children: [
-                                const TabBar(
-                                  tabs: [
+                                TabBar(
+                                  indicatorColor: theme.colorScheme.primary,
+                                  labelColor: theme.colorScheme.primary,
+                                  unselectedLabelColor: Colors.white24,
+                                  tabs: const [
                                     Tab(icon: Icon(Icons.lan_outlined), text: 'GRAPH'),
                                     Tab(icon: Icon(Icons.monitor_heart), text: 'SYSTEM'),
                                   ],

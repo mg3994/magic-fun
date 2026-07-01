@@ -112,8 +112,10 @@ class _LogicGridCanvasState extends State<LogicGridCanvas> {
                 child: Stack(
                   children: [
                     Positioned.fill(
-                      child: InteractiveViewer(
-                        transformationController: _transformationController,
+                      child: MouseRegion(
+                        cursor: SystemMouseCursors.move,
+                        child: InteractiveViewer(
+                          transformationController: _transformationController,
                         boundaryMargin: const EdgeInsets.all(5000.0),
                         minScale: 0.2,
                         maxScale: 4.0,
@@ -148,6 +150,9 @@ class _LogicGridCanvasState extends State<LogicGridCanvas> {
                           left: node.posX,
                           top: node.posY,
                           child: GestureDetector(
+                            onPanStart: (details) {
+                              state.selectNode(node);
+                            },
                             onPanUpdate: (details) {
                               final scale =
                                   _transformationController.value.getMaxScaleOnAxis();

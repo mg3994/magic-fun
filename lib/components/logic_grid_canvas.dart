@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'dart:async';
 import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:syncpoint_paradox_logic/globals/app_state.dart';
@@ -21,6 +22,8 @@ class LogicGridCanvas extends StatefulWidget {
 @NowaGenerated()
 class _LogicGridCanvasState extends State<LogicGridCanvas> {
   Timer? _animationTimer;
+  final TransformationController _transformationController =
+      TransformationController();
 
   @override
   void initState() {
@@ -30,11 +33,33 @@ class _LogicGridCanvasState extends State<LogicGridCanvas> {
         setState(() {});
       }
     });
+
+    final state = AppState.of(context, listen: false);
+    _transformationController.value = Matrix4.identity()
+      ..translate(state.canvasOffsetX, state.canvasOffsetY)
+      ..scale(state.canvasScale);
+
+    _transformationController.addListener(_onTransformationChanged);
+  }
+
+  void _onTransformationChanged() {
+    final state = AppState.of(context, listen: false);
+    final matrix = _transformationController.value;
+    final translation = matrix.getTranslation();
+    final scale = matrix.getMaxScaleOnAxis();
+
+    if (scale != state.canvasScale ||
+        translation.x != state.canvasOffsetX ||
+        translation.y != state.canvasOffsetY) {
+      state.updateCanvasTransform(translation.x, translation.y, scale);
+    }
   }
 
   @override
   void dispose() {
     _animationTimer?.cancel();
+    _transformationController.removeListener(_onTransformationChanged);
+    _transformationController.dispose();
     super.dispose();
   }
 
@@ -42,38 +67,73 @@ class _LogicGridCanvasState extends State<LogicGridCanvas> {
   Widget build(BuildContext context) {
     final state = AppState.of(context, listen: true);
     final theme = Theme.of(context);
+    final isHorizontal = MediaQuery.of(context).size.width > 900;
+
+    // Sync from state if needed (e.g. when resetZoom is called)
+    final matrix = _transformationController.value;
+    if ((matrix.getMaxScaleOnAxis() - state.canvasScale).abs() > 0.001 ||
+        (matrix.getTranslation().x - state.canvasOffsetX).abs() > 0.001 ||
+        (matrix.getTranslation().y - state.canvasOffsetY).abs() > 0.001) {
+      _transformationController.value = Matrix4.identity()
+        ..translate(state.canvasOffsetX, state.canvasOffsetY)
+        ..scale(state.canvasScale);
+    }
+
     return LayoutBuilder(
-      builder: (context, constraints) => ClipRect(
-        child: Container(
-          color: theme.colorScheme.surfaceContainerLowest,
-          child: Stack(
-            children: [
-              Positioned.fill(
-                child: GestureDetector(
-                  onPanUpdate: (details) {
-                    state.panCanvas(details.delta.dx, details.delta.dy);
-                  },
-                  behavior: HitTestBehavior.opaque,
-                  child: Container(),
-                ),
-              ),
-              Positioned.fill(
-                child: Transform(
-                  transform: Matrix4.identity()
-                    ..translate(state.canvasOffsetX, state.canvasOffsetY)
-                    ..scale(state.canvasScale),
-                  child: Stack(
-                    children: [
-                      Positioned.fill(
-                        child: CustomPaint(
-                          painter: ConnectionPainter(
-                            nodes: state.nodes,
-                            connectingSourceId: state.connectingSourceId,
-                            context: context,
-                          ),
-                        ),
-                      ),
-                      ...state.nodes.map((node) {
+      builder: (context, constraints) => Shortcuts(
+        shortcuts: <ShortcutActivator, Intent>{
+          LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.equal):
+              const _ZoomIntent.in_(),
+          LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.minus):
+              const _ZoomIntent.out(),
+          LogicalKeySet(LogicalKeyboardKey.control, LogicalKeyboardKey.digit0):
+              const _ZoomIntent.reset(),
+        },
+        child: Actions(
+          actions: <Type, Action<Intent>>{
+            _ZoomIntent: CallbackAction<_ZoomIntent>(
+              onInvoke: (intent) {
+                if (intent.type == _ZoomType.in_) {
+                  state.zoomIn();
+                } else if (intent.type == _ZoomType.out) {
+                  state.zoomOut();
+                } else {
+                  state.resetZoom();
+                }
+                return null;
+              },
+            ),
+          },
+          child: Focus(
+            autofocus: true,
+            child: ClipRect(
+              child: Container(
+                color: theme.colorScheme.surfaceContainerLowest,
+                child: Stack(
+                  children: [
+                    Positioned.fill(
+                      child: InteractiveViewer(
+                        transformationController: _transformationController,
+                        boundaryMargin: const EdgeInsets.all(double.infinity),
+                        minScale: 0.2,
+                        maxScale: 4.0,
+                        child: SizedBox(
+                          width: 5000,
+                          height: 5000,
+                          child: Stack(
+                            clipBehavior: Clip.none,
+                            children: [
+                              // Larger area for drawing connections
+                              Positioned.fill(
+                                child: CustomPaint(
+                                  painter: ConnectionPainter(
+                                    nodes: state.nodes,
+                                    connectingSourceId: state.connectingSourceId,
+                                    context: context,
+                                  ),
+                                ),
+                              ),
+                              ...state.nodes.map((node) {
                         final isSelected = state.selectedNode?.id == node.id;
                         final isSource = state.connectingSourceId == node.id;
                         final canBeTarget =
@@ -84,23 +144,19 @@ class _LogicGridCanvasState extends State<LogicGridCanvas> {
                             node.calculatedValue < node.targetValueRangeMin ||
                             node.calculatedValue > node.targetValueRangeMax;
                         return Positioned(
-                          left: node.posX,
-                          top: node.posY,
+                          left: node.posX + 2500,
+                          top: node.posY + 2500,
                           child: GestureDetector(
                             onPanUpdate: (details) {
-                              final scaledDx =
-                                  details.delta.dx / state.canvasScale;
-                              final scaledDy =
-                                  details.delta.dy / state.canvasScale;
-                              final newX = (node.posX + scaledDx).clamp(
-                                0.0,
-                                1600.0,
-                              ).toDouble();
-                              final newY = (node.posY + scaledDy).clamp(
-                                0.0,
-                                1200.0,
-                              ).toDouble();
-                              state.updateNodePosition(node.id, newX, newY);
+                              final scale =
+                                  _transformationController.value.getMaxScaleOnAxis();
+                              final scaledDx = details.delta.dx / scale;
+                              final scaledDy = details.delta.dy / scale;
+                              state.updateNodePosition(
+                                node.id,
+                                node.posX + scaledDx,
+                                node.posY + scaledDy,
+                              );
                             },
                             onTap: () {
                               state.selectNode(node);
@@ -115,11 +171,12 @@ class _LogicGridCanvasState extends State<LogicGridCanvas> {
                           ),
                         );
                       }),
-                    ],
-                  ),
-                ),
-              ),
-              if (state.connectingSourceId != null)
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    if (state.connectingSourceId != null)
                 Positioned(
                   top: 16.0,
                   left: 16.0,
@@ -170,10 +227,10 @@ class _LogicGridCanvasState extends State<LogicGridCanvas> {
                     ),
                   ),
                 ),
-              Positioned(
-                bottom: 20.0,
-                right: 20.0,
-                child: Container(
+                    Positioned(
+                      bottom: isHorizontal ? 20.0 : 420.0,
+                      right: 20.0,
+                      child: Container(
                   padding: const EdgeInsets.all(4.0),
                   decoration: BoxDecoration(
                     color: theme.colorScheme.surface.withValues(alpha: 0.9),
@@ -236,9 +293,9 @@ class _LogicGridCanvasState extends State<LogicGridCanvas> {
                 ),
               ),
               Positioned(
-                bottom: 20.0,
-                left: 20.0,
-                child: Container(
+                      bottom: isHorizontal ? 20.0 : 420.0,
+                      left: 20.0,
+                      child: Container(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 10.0,
                     vertical: 6.0,
@@ -360,12 +417,25 @@ class _LogicGridCanvasState extends State<LogicGridCanvas> {
                       ),
                     ],
                   ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
+}
+
+enum _ZoomType { in_, out, reset }
+
+class _ZoomIntent extends Intent {
+  const _ZoomIntent.in_() : type = _ZoomType.in_;
+  const _ZoomIntent.out() : type = _ZoomType.out;
+  const _ZoomIntent.reset() : type = _ZoomType.reset;
+
+  final _ZoomType type;
 }

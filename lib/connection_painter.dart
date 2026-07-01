@@ -51,8 +51,8 @@ class ConnectionPainter extends CustomPainter {
         if (sourceNode == null) {
           continue;
         }
-        final start = Offset(sourceNode.posX + 250 + 2500, sourceNode.posY + 70 + 2500);
-        final end = Offset(targetNode.posX + 2500, targetNode.posY + 70 + 2500);
+        final start = Offset(sourceNode.posX + 250, sourceNode.posY + 70);
+        final end = Offset(targetNode.posX, targetNode.posY + 70);
         final controlPoint1 = Offset(start.dx + 60, start.dy);
         final controlPoint2 = Offset(end.dx - 60, end.dy);
         final path = Path();

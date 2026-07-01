@@ -220,12 +220,13 @@ class _RealityTreeSidebarState extends State<RealityTreeSidebar> {
                         onPressed: () {
                           final name = _nameController.text.trim();
                           if (name.isNotEmpty) {
+                            // Place new nodes near the center of the coordinate space
                             state.createNode(
                               name,
                               _selectedType,
                               _selectedFuncType,
-                              250,
-                              150 + (state.nodes.length * 40) % 300,
+                              2500,
+                              2500,
                             );
                             _nameController.clear();
                             setState(() {

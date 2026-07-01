@@ -114,9 +114,10 @@ class _LogicGridCanvasState extends State<LogicGridCanvas> {
                     Positioned.fill(
                       child: InteractiveViewer(
                         transformationController: _transformationController,
-                        boundaryMargin: const EdgeInsets.all(double.infinity),
+                        boundaryMargin: const EdgeInsets.all(5000.0),
                         minScale: 0.2,
                         maxScale: 4.0,
+                        constrained: false,
                         child: SizedBox(
                           width: 5000,
                           height: 5000,
@@ -144,8 +145,8 @@ class _LogicGridCanvasState extends State<LogicGridCanvas> {
                             node.calculatedValue < node.targetValueRangeMin ||
                             node.calculatedValue > node.targetValueRangeMax;
                         return Positioned(
-                          left: node.posX + 2500,
-                          top: node.posY + 2500,
+                          left: node.posX,
+                          top: node.posY,
                           child: GestureDetector(
                             onPanUpdate: (details) {
                               final scale =
@@ -330,16 +331,8 @@ class _LogicGridCanvasState extends State<LogicGridCanvas> {
                       const SizedBox(width: 8.0),
                       ElevatedButton.icon(
                         onPressed: () {
-                          final centerX =
-                              (constraints.maxWidth / 2 -
-                                  125 -
-                                  state.canvasOffsetX) /
-                              state.canvasScale;
-                          final centerY =
-                              (constraints.maxHeight / 2 -
-                                  90 -
-                                  state.canvasOffsetY) /
-                              state.canvasScale;
+                          final centerX = (constraints.maxWidth / 2 - 125 - state.canvasOffsetX) / state.canvasScale;
+                          final centerY = (constraints.maxHeight / 2 - 90 - state.canvasOffsetY) / state.canvasScale;
                           state.createNode(
                             'Constant Feed',
                             RealityNodeType.constant,
@@ -373,16 +366,8 @@ class _LogicGridCanvasState extends State<LogicGridCanvas> {
                       const SizedBox(width: 8.0),
                       ElevatedButton.icon(
                         onPressed: () {
-                          final centerX =
-                              (constraints.maxWidth / 2 -
-                                  125 -
-                                  state.canvasOffsetX) /
-                              state.canvasScale;
-                          final centerY =
-                              (constraints.maxHeight / 2 -
-                                  90 -
-                                  state.canvasOffsetY) /
-                              state.canvasScale;
+                          final centerX = (constraints.maxWidth / 2 - 125 - state.canvasOffsetX) / state.canvasScale;
+                          final centerY = (constraints.maxHeight / 2 - 90 - state.canvasOffsetY) / state.canvasScale;
                           state.createNode(
                             'Operator Module',
                             RealityNodeType.function,

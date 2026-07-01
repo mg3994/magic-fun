@@ -153,16 +153,7 @@ class HomePage extends StatelessWidget {
       body: SafeArea(
         child: Stack(
           children: [
-            Container(
-              decoration: showCriticalFlash
-                  ? BoxDecoration(
-                      border: Border.all(
-                        color: Colors.redAccent.withValues(alpha: 0.6),
-                        width: 4,
-                      ),
-                    )
-                  : null,
-              child: LayoutBuilder(
+            LayoutBuilder(
                 builder: (context, constraints) {
                   if (constraints.maxWidth > 900) {
                     return Row(
@@ -218,7 +209,17 @@ class HomePage extends StatelessWidget {
                   }
                 },
               ),
-            ),
+            if (showCriticalFlash)
+              IgnorePointer(
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(
+                      color: Colors.redAccent.withValues(alpha: 0.6),
+                      width: 4,
+                    ),
+                  ),
+                ),
+              ),
             if (state.hasParadox)
               Positioned(
                 top: 80,

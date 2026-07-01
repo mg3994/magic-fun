@@ -157,15 +157,10 @@ class _LogicGridCanvasState extends State<LogicGridCanvas> {
                                         state.selectNode(node);
                                       },
                                       onPanUpdate: (details) {
-                                        final scale = _transformationController
-                                            .value
-                                            .getMaxScaleOnAxis();
-                                        final scaledDx = details.delta.dx / scale;
-                                        final scaledDy = details.delta.dy / scale;
                                         state.updateNodePosition(
                                           node.id,
-                                          node.posX + scaledDx,
-                                          node.posY + scaledDy,
+                                          node.posX + details.delta.dx,
+                                          node.posY + details.delta.dy,
                                         );
                                       },
                                       onTap: () {

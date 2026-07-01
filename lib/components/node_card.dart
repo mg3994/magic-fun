@@ -42,35 +42,37 @@ class NodeCard extends StatelessWidget {
       borderAccent = Colors.red;
     }
     final int upgradeCost = (45 * node.level).toInt();
-    return Container(
-      width: 250.0,
-      decoration: BoxDecoration(
-        color: theme.colorScheme.surface,
-        borderRadius: BorderRadius.circular(12.0),
-        border: Border.all(
-          color: borderAccent,
-          width: isSelected || isSource || canBeTarget ? 2.5 : 1.5,
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 8.0,
-            offset: const Offset(0.0, 4.0),
+    return MouseRegion(
+      cursor: isSelected ? SystemMouseCursors.grabbing : SystemMouseCursors.grab,
+      child: Container(
+        width: 250.0,
+        decoration: BoxDecoration(
+          color: theme.colorScheme.surface.withValues(alpha: 0.9),
+          borderRadius: BorderRadius.circular(12.0),
+          border: Border.all(
+            color: borderAccent,
+            width: isSelected || isSource || canBeTarget ? 2.5 : 1.5,
           ),
-          if (isSelected)
+          boxShadow: [
             BoxShadow(
-              color: theme.colorScheme.primary.withValues(alpha: 0.25),
+              color: Colors.black.withValues(alpha: 0.3),
               blurRadius: 12.0,
-              spreadRadius: 2.0,
+              offset: const Offset(0.0, 6.0),
             ),
-          if (node.stability < 30)
-            BoxShadow(
-              color: Colors.red.withValues(alpha: 0.2),
-              blurRadius: 8.0,
-              spreadRadius: 1.0,
-            ),
-        ],
-      ),
+            if (isSelected)
+              BoxShadow(
+                color: theme.colorScheme.primary.withValues(alpha: 0.4),
+                blurRadius: 16.0,
+                spreadRadius: 3.0,
+              ),
+            if (node.stability < 30)
+              BoxShadow(
+                color: Colors.red.withValues(alpha: 0.3),
+                blurRadius: 10.0,
+                spreadRadius: 2.0,
+              ),
+          ],
+        ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -493,7 +495,8 @@ class NodeCard extends StatelessWidget {
               ],
             ),
           ),
-        ],
+          ],
+        ),
       ),
     );
   }

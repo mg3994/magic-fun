@@ -74,9 +74,9 @@ class AppState extends ChangeNotifier {
 
   double canvasScale = 1.0;
 
-  double canvasOffsetX = 0.0;
+  double canvasOffsetX = -2100.0;
 
-  double canvasOffsetY = 0.0;
+  double canvasOffsetY = -2300.0;
 
   bool isTerminalTheme = true;
 
@@ -787,8 +787,8 @@ class AppState extends ChangeNotifier {
 
   void resetZoom() {
     canvasScale = 1.0;
-    canvasOffsetX = 0.0;
-    canvasOffsetY = 0.0;
+    canvasOffsetX = -2100.0;
+    canvasOffsetY = -2300.0;
     notifyListeners();
   }
 

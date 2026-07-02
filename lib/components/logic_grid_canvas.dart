@@ -167,8 +167,8 @@ class _LogicGridCanvasState extends State<LogicGridCanvas> {
                                         onPanUpdate: (details) {
                                           state.updateNodePosition(
                                             node.id,
-                                            node.posX + details.delta.dx,
-                                            node.posY + details.delta.dy,
+                                  node.posX + details.delta.dx / state.canvasScale,
+                                  node.posY + details.delta.dy / state.canvasScale,
                                           );
                                         },
                                         onPanEnd: (_) {

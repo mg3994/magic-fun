@@ -22,6 +22,7 @@ class LogicGridCanvas extends StatefulWidget {
 @NowaGenerated()
 class _LogicGridCanvasState extends State<LogicGridCanvas> {
   Timer? _animationTimer;
+  String? _draggingNodeId;
   final TransformationController _transformationController =
       TransformationController();
 
@@ -113,7 +114,7 @@ class _LogicGridCanvasState extends State<LogicGridCanvas> {
                   children: [
                     Positioned.fill(
                       child: MouseRegion(
-                        cursor: SystemMouseCursors.allScroll,
+                        cursor: SystemMouseCursors.basic,
                         child: InteractiveViewer(
                           transformationController: _transformationController,
                           boundaryMargin: const EdgeInsets.all(5000.0),
@@ -152,26 +153,44 @@ class _LogicGridCanvasState extends State<LogicGridCanvas> {
                                   return Positioned(
                                     left: node.posX,
                                     top: node.posY,
-                                    child: GestureDetector(
-                                      onPanStart: (details) {
-                                        state.selectNode(node);
-                                      },
-                                      onPanUpdate: (details) {
-                                        state.updateNodePosition(
-                                          node.id,
-                                          node.posX + details.delta.dx / state.canvasScale,
-                                          node.posY + details.delta.dy / state.canvasScale,
-                                        );
-                                      },
-                                      onTap: () {
-                                        state.selectNode(node);
-                                      },
-                                      child: NodeCard(
-                                        node: node,
-                                        isSelected: isSelected,
-                                        isSource: isSource,
-                                        canBeTarget: canBeTarget,
-                                        isOutOfBounds: isOutOfBounds,
+                                    child: MouseRegion(
+                                      cursor: _draggingNodeId == node.id
+                                          ? SystemMouseCursors.allScroll
+                                          : SystemMouseCursors.basic,
+                                      child: GestureDetector(
+                                        onPanStart: (details) {
+                                          state.selectNode(node);
+                                          setState(() {
+                                            _draggingNodeId = node.id;
+                                          });
+                                        },
+                                        onPanUpdate: (details) {
+                                          state.updateNodePosition(
+                                            node.id,
+                                            node.posX + details.delta.dx,
+                                            node.posY + details.delta.dy,
+                                          );
+                                        },
+                                        onPanEnd: (_) {
+                                          setState(() {
+                                            _draggingNodeId = null;
+                                          });
+                                        },
+                                        onPanCancel: () {
+                                          setState(() {
+                                            _draggingNodeId = null;
+                                          });
+                                        },
+                                        onTap: () {
+                                          state.selectNode(node);
+                                        },
+                                        child: NodeCard(
+                                          node: node,
+                                          isSelected: isSelected,
+                                          isSource: isSource,
+                                          canBeTarget: canBeTarget,
+                                          isOutOfBounds: isOutOfBounds,
+                                        ),
                                       ),
                                     ),
                                   );

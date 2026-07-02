@@ -201,9 +201,9 @@ class _LogicGridCanvasState extends State<LogicGridCanvas> {
 
                                             // Directly update node position in state
                                           state.updateNodePosition(
-                                            node.id,
                                             newNodePos.dx,
                                             newNodePos.dy,
+                                              node.id,
                                           );
                                         }
                                       },

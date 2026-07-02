@@ -321,12 +321,16 @@ class AppState extends ChangeNotifier {
     notifyListeners();
   }
 
-  void updateNodePosition(String id, double dx, double dy) {
+  void updateNodePosition(double x, double y, String id) {
     final index = nodes.indexWhere((n) => n.id == id);
     if (index == -1) {
       return;
     }
-    nodes[index] = nodes[index].copyWith(posX: dx, posY: dy);
+    // Clamp to ensure node stays within the 5000x5000 hit-testable canvas area
+    // Node width is roughly 250, height varies but ~200 is safe
+    final clampedX = x.clamp(0.0, 4750.0);
+    final clampedY = y.clamp(0.0, 4800.0);
+    nodes[index] = nodes[index].copyWith(posX: clampedX, posY: clampedY);
     notifyListeners();
   }
 

@@ -43,7 +43,7 @@ class NodeCard extends StatelessWidget {
     }
     final int upgradeCost = (45 * node.level).toInt();
     return MouseRegion(
-      cursor: SystemMouseCursors.move,
+      cursor: SystemMouseCursors.allScroll,
       child: Container(
         width: 250.0,
         decoration: BoxDecoration(

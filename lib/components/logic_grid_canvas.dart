@@ -23,6 +23,9 @@ class LogicGridCanvas extends StatefulWidget {
 class _LogicGridCanvasState extends State<LogicGridCanvas> {
   Timer? _animationTimer;
   String? _draggingNodeId;
+  bool _isPanning = false;
+  Offset? _dragOffsetWithinNode;
+  final GlobalKey _canvasKey = GlobalKey();
   final TransformationController _transformationController =
       TransformationController();
 
@@ -114,14 +117,29 @@ class _LogicGridCanvasState extends State<LogicGridCanvas> {
                   children: [
                     Positioned.fill(
                       child: MouseRegion(
-                        cursor: SystemMouseCursors.basic,
+                        cursor: (_draggingNodeId != null || _isPanning)
+                            ? SystemMouseCursors.allScroll
+                            : SystemMouseCursors.basic,
                         child: InteractiveViewer(
                           transformationController: _transformationController,
+                          onInteractionStart: (details) {
+                            if (_draggingNodeId == null) {
+                              setState(() {
+                                _isPanning = true;
+                              });
+                            }
+                          },
+                          onInteractionEnd: (details) {
+                            setState(() {
+                              _isPanning = false;
+                            });
+                          },
                           boundaryMargin: const EdgeInsets.all(5000.0),
                           minScale: 0.2,
                           maxScale: 4.0,
                           constrained: false,
                           child: SizedBox(
+                            key: _canvasKey,
                             width: 5000,
                             height: 5000,
                             child: Stack(
@@ -153,44 +171,63 @@ class _LogicGridCanvasState extends State<LogicGridCanvas> {
                                   return Positioned(
                                     left: node.posX,
                                     top: node.posY,
-                                    child: MouseRegion(
-                                      cursor: _draggingNodeId == node.id
-                                          ? SystemMouseCursors.allScroll
-                                          : SystemMouseCursors.basic,
-                                      child: GestureDetector(
-                                        onPanStart: (details) {
-                                          state.selectNode(node);
-                                          setState(() {
-                                            _draggingNodeId = node.id;
-                                          });
-                                        },
-                                        onPanUpdate: (details) {
+                                    child: GestureDetector(
+                                      onPanStart: (details) {
+                                        state.selectNode(node);
+                                        final RenderBox renderBox =
+                                            _canvasKey.currentContext!
+                                                    .findRenderObject()
+                                                as RenderBox;
+                                        final localPos = renderBox
+                                            .globalToLocal(
+                                                details.globalPosition);
+                                        setState(() {
+                                          _draggingNodeId = node.id;
+                                          _dragOffsetWithinNode = localPos -
+                                              Offset(node.posX, node.posY);
+                                        });
+                                      },
+                                      onPanUpdate: (details) {
+                                        if (_dragOffsetWithinNode != null) {
+                                          final RenderBox renderBox =
+                                              _canvasKey.currentContext!
+                                                      .findRenderObject()
+                                                  as RenderBox;
+                                          final localPos = renderBox
+                                              .globalToLocal(
+                                                  details.globalPosition);
+                                          final newNodePos =
+                                              localPos - _dragOffsetWithinNode!;
+
+                                            // Directly update node position in state
                                           state.updateNodePosition(
-                                            node.id,
-                                  node.posX + details.delta.dx / state.canvasScale,
-                                  node.posY + details.delta.dy / state.canvasScale,
+                                            newNodePos.dx,
+                                            newNodePos.dy,
+                                              node.id,
                                           );
-                                        },
-                                        onPanEnd: (_) {
-                                          setState(() {
-                                            _draggingNodeId = null;
-                                          });
-                                        },
-                                        onPanCancel: () {
-                                          setState(() {
-                                            _draggingNodeId = null;
-                                          });
-                                        },
-                                        onTap: () {
-                                          state.selectNode(node);
-                                        },
-                                        child: NodeCard(
-                                          node: node,
-                                          isSelected: isSelected,
-                                          isSource: isSource,
-                                          canBeTarget: canBeTarget,
-                                          isOutOfBounds: isOutOfBounds,
-                                        ),
+                                        }
+                                      },
+                                      onPanEnd: (_) {
+                                        setState(() {
+                                          _draggingNodeId = null;
+                                          _dragOffsetWithinNode = null;
+                                        });
+                                      },
+                                      onPanCancel: () {
+                                        setState(() {
+                                          _draggingNodeId = null;
+                                          _dragOffsetWithinNode = null;
+                                        });
+                                      },
+                                      onTap: () {
+                                        state.selectNode(node);
+                                      },
+                                      child: NodeCard(
+                                        node: node,
+                                        isSelected: isSelected,
+                                        isSource: isSource,
+                                        canBeTarget: canBeTarget,
+                                        isOutOfBounds: isOutOfBounds,
                                       ),
                                     ),
                                   );

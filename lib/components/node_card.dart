@@ -42,9 +42,7 @@ class NodeCard extends StatelessWidget {
       borderAccent = Colors.red;
     }
     final int upgradeCost = (45 * node.level).toInt();
-    return MouseRegion(
-      cursor: SystemMouseCursors.allScroll,
-      child: Container(
+    return Container(
         width: 250.0,
         decoration: BoxDecoration(
           color: theme.colorScheme.surface.withValues(alpha: 0.9),
@@ -497,7 +495,6 @@ class NodeCard extends StatelessWidget {
           ),
           ],
         ),
-      ),
-    );
+      );
   }
 }

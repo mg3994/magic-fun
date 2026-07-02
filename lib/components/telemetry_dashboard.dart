@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:nowa_runtime/nowa_runtime.dart';
 import 'package:syncpoint_paradox_logic/globals/app_state.dart';
@@ -152,21 +153,28 @@ class TelemetryDashboard extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 6),
-                      Text(
-                        '${state.totalStability}%',
-                        style: theme.textTheme.displayMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: state.isTerminalTheme
-                              ? (state.totalStability > 60
-                                    ? const Color(0xFF00FF66)
-                                    : state.totalStability > 30
-                                    ? Colors.amberAccent
-                                    : Colors.redAccent)
-                              : (state.totalStability > 60
-                                    ? Colors.green
-                                    : state.totalStability > 30
-                                    ? Colors.amber
-                                    : Colors.red),
+                      SizedBox(
+                        height: 60,
+                        child: Center(
+                          child: Text(
+                            '${state.totalStability.toStringAsFixed(1)}%',
+                            style: theme.textTheme.displayMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontFeatures: const [FontFeature.tabularFigures()],
+                              fontSize: 32,
+                              color: state.isTerminalTheme
+                                  ? (state.totalStability > 60
+                                        ? const Color(0xFF00FF66)
+                                        : state.totalStability > 30
+                                        ? Colors.amberAccent
+                                        : Colors.redAccent)
+                                  : (state.totalStability > 60
+                                        ? Colors.green
+                                        : state.totalStability > 30
+                                        ? Colors.amber
+                                        : Colors.red),
+                            ),
+                          ),
                         ),
                       ),
                       const SizedBox(height: 8),

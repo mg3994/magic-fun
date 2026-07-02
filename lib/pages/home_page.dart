@@ -152,8 +152,10 @@ class HomePage extends StatelessWidget {
       backgroundColor: const Color(0xFF020408),
       body: SafeArea(
         child: Stack(
+          fit: StackFit.expand,
           children: [
-            LayoutBuilder(
+            Positioned.fill(
+              child: LayoutBuilder(
                 builder: (context, constraints) {
                   if (constraints.maxWidth > 900) {
                     return Row(
@@ -209,13 +211,16 @@ class HomePage extends StatelessWidget {
                   }
                 },
               ),
+            ),
             if (showCriticalFlash)
-              IgnorePointer(
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: Colors.redAccent.withValues(alpha: 0.6),
-                      width: 4,
+              Positioned.fill(
+                child: IgnorePointer(
+                  child: Container(
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: Colors.redAccent.withValues(alpha: 0.6),
+                        width: 4,
+                      ),
                     ),
                   ),
                 ),
